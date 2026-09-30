@@ -2,6 +2,8 @@
 
 Nền tảng AI Running Coach kết nối Strava, phân tích lịch sử chạy và tạo khuyến nghị tập luyện cá nhân hóa.
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2Fdunghuy05-collab%2FVRathon)
+
 ## Kiến trúc
 
 - `backend/`: FastAPI, SQLAlchemy, PostgreSQL/SQLite, Strava OAuth, OpenAI Responses API.

@@ -1,3 +1,5 @@
+import base64
+import hashlib
 from datetime import datetime, timedelta, timezone
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -33,7 +35,10 @@ def decode_access_token(token: str) -> int | None:
 def _fernet() -> Fernet | None:
     if not settings.token_encryption_key:
         return None
-    return Fernet(settings.token_encryption_key.encode())
+    # Accept a regular Render-generated secret and deterministically turn it into
+    # the URL-safe 32-byte key required by Fernet.
+    key = base64.urlsafe_b64encode(hashlib.sha256(settings.token_encryption_key.encode()).digest())
+    return Fernet(key)
 
 
 def encrypt_secret(value: str) -> str:

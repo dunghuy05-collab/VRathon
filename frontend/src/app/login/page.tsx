@@ -11,6 +11,16 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  async function previewDemo() {
+    setLoading(true); setError("");
+    try {
+      const result = await api<{ access_token: string }>("/auth/demo", { method: "POST" });
+      localStorage.setItem("token", result.access_token);
+      router.push("/");
+    } catch (err) { setError(err instanceof Error ? err.message : "Không thể tạo bản demo"); }
+    finally { setLoading(false); }
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setLoading(true); setError("");
     const data = Object.fromEntries(new FormData(event.currentTarget));
@@ -42,6 +52,8 @@ export default function LoginPage() {
           {error && <p className="rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700">{error}</p>}
           <button className="button-primary w-full" disabled={loading}>{loading ? "Đang xử lý…" : register ? "Tạo tài khoản" : "Đăng nhập"}<ArrowRight size={17}/></button>
         </form>
+        <div className="my-5 flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-ink/30"><span className="h-px flex-1 bg-ink/10"/>hoặc<span className="h-px flex-1 bg-ink/10"/></div>
+        <button onClick={previewDemo} disabled={loading} className="button-accent w-full border border-ink">Xem dashboard với dữ liệu demo <ArrowRight size={17}/></button>
         <button onClick={() => { setRegister(!register); setError(""); }} className="mt-6 w-full text-center text-sm font-bold text-ink/55 hover:text-ink">{register ? "Đã có tài khoản? Đăng nhập" : "Chưa có tài khoản? Đăng ký"}</button>
       </div>
     </section>

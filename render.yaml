@@ -3,12 +3,14 @@ databases:
     plan: free
     databaseName: marathonvis
     user: marathonvis
+    region: singapore
 
 services:
   - type: web
     name: marathonvis-api
     runtime: python
     plan: free
+    region: singapore
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
@@ -21,51 +23,32 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: TOKEN_ENCRYPTION_KEY
-        sync: false
+        generateValue: true
       - key: FRONTEND_URL
-        sync: false
+        fromService:
+          type: web
+          name: marathonvis-web
+          envVarKey: RENDER_EXTERNAL_URL
       - key: BACKEND_URL
-        sync: false
-      - key: STRAVA_CLIENT_ID
-        sync: false
-      - key: STRAVA_CLIENT_SECRET
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
+        fromService:
+          type: web
+          name: marathonvis-api
+          envVarKey: RENDER_EXTERNAL_URL
 
   - type: web
     name: marathonvis-web
     runtime: node
     plan: free
+    region: singapore
     rootDir: frontend
     buildCommand: npm ci && npm run build
     startCommand: npm start
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        sync: false
-
-  - type: cron
-    name: marathonvis-sync
-    runtime: python
-    plan: starter
-    rootDir: backend
-    schedule: "0 */3 * * *"
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m app.workers.sync
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: marathonvis-db
-          property: connectionString
-      - key: SECRET_KEY
+        value: /api/v1
+      - key: INTERNAL_API_HOSTPORT
         fromService:
           type: web
           name: marathonvis-api
-          envVarKey: SECRET_KEY
-      - key: TOKEN_ENCRYPTION_KEY
-        sync: false
-      - key: STRAVA_CLIENT_ID
-        sync: false
-      - key: STRAVA_CLIENT_SECRET
-        sync: false
+          property: hostport
 
