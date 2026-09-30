@@ -62,5 +62,6 @@ cd frontend && npm run typecheck && npm run build
 - Access/refresh token Strava được mã hóa ở trạng thái lưu nếu có khóa Fernet.
 - OAuth `state` được ký và có hạn dùng; access token Strava tự làm mới trước khi hết hạn.
 - Bản MVP tạo bảng tự động khi API khởi động. Trước thay đổi schema production, nên bổ sung Alembic migration.
+- Blueprint preview dùng SQLite trên filesystem tạm của Render để không chiếm thêm suất PostgreSQL miễn phí; dữ liệu có thể bị xóa khi deploy/restart. Production nên đặt `DATABASE_URL` tới PostgreSQL hiện có.
 - Chỉ số tải và nội dung AI là hỗ trợ ra quyết định, không phải tư vấn y tế.
 
