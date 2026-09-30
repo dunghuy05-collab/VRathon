@@ -1,0 +1,71 @@
+databases:
+  - name: marathonvis-db
+    plan: free
+    databaseName: marathonvis
+    user: marathonvis
+
+services:
+  - type: web
+    name: marathonvis-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: marathonvis-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: BACKEND_URL
+        sync: false
+      - key: STRAVA_CLIENT_ID
+        sync: false
+      - key: STRAVA_CLIENT_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+
+  - type: web
+    name: marathonvis-web
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+
+  - type: cron
+    name: marathonvis-sync
+    runtime: python
+    plan: starter
+    rootDir: backend
+    schedule: "0 */3 * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m app.workers.sync
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: marathonvis-db
+          property: connectionString
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: marathonvis-api
+          envVarKey: SECRET_KEY
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: STRAVA_CLIENT_ID
+        sync: false
+      - key: STRAVA_CLIENT_SECRET
+        sync: false
+
